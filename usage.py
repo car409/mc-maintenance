@@ -47,6 +47,8 @@ _FOOTER = """
 def ConvertTime(date, line):
   from_zone = pytz.timezone('UTC')
   to_zone = pytz.timezone('America/New_York')
+  if date.startswith('latest'):
+    date = str(datetime.now().date())
   utc = datetime.strptime(date + ' ' + line[1:9], '%Y-%m-%d %H:%M:%S')
   return utc.replace(tzinfo=from_zone).astimezone(to_zone)
 
