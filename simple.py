@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from datetime import datetime
+import pytz
 import usage
 import sys
 import BaseHTTPServer
@@ -8,6 +10,10 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        #start = datetime.strptime('2016-03-18', '%Y-%m-%d')
+        #end = datetime.strptime('2016-03-30', '%Y-%m-%d')
+        #tz = pytz.timezone('America/New_York')
+        #chart = usage.GenerateChart(start.replace(tzinfo=tz), end.replace(tzinfo=tz))
         chart = usage.GenerateChart()
         self.send_response(200)
         self.send_header('Content-type', 'text/html')

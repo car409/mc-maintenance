@@ -219,8 +219,8 @@ class LogAnalyzer(object):
       self._result[user] = self._zipTimes(user)
 
 
-def GenerateChart():
-  logAnalyzer = LogAnalyzer()
+def GenerateChart(start=None, end=None):
+  logAnalyzer = LogAnalyzer(log_dir=None, start=start, end=end)
   logAnalyzer.Analyze()
   return ''.join([_HEADER, ToRows(logAnalyzer._result), _FOOTER])
   
