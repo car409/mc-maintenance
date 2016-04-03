@@ -6,7 +6,13 @@ import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 
-HandlerClass = SimpleHTTPRequestHandler
+class MyHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/':
+            self.path = '/out.html'
+        return SimpleHTTPRequestHandler.do_GET(self)
+        
+HandlerClass = MyHandler
 ServerClass  = BaseHTTPServer.HTTPServer
 Protocol     = "HTTP/1.0"
 
