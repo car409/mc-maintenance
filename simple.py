@@ -8,9 +8,13 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/':
-            self.path = '/out.html'
-        return SimpleHTTPRequestHandler.do_GET(self)
+        chart = usage.GenerateChart()
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-length', len(chart))
+        self.end_headers()
+        self.wfile.write(chart)
+        
         
 HandlerClass = MyHandler
 ServerClass  = BaseHTTPServer.HTTPServer
