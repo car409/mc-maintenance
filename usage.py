@@ -187,18 +187,14 @@ class LogAnalyzer(object):
       self._result[user] = self._zipTimes(user)
 
 
-def main():
+def GenerateChart():
   logAnalyzer = LogAnalyzer()
   logAnalyzer.Analyze()
-  #for user in logAnalyzer._result:
-  #  print user + ':'
-  #  for pair in logAnalyzer._result[user]:
-  #    print '  ' + str(pair)
-  #print 'Stop times:\n   ' + str(len(logAnalyzer._server_stop_times))
-  #for time in sorted(logAnalyzer._server_stop_times):
-  #  print '  ' + str(time)
-  #print 'DONE!!!!!!!!!'
-  print ''.join([_HEADER, ToRows(logAnalyzer._result), _FOOTER])
+  return ''.join([_HEADER, ToRows(logAnalyzer._result), _FOOTER])
+  
+  
+def main():
+  print GenerateChart()
 
 
 if __name__ == "__main__":
