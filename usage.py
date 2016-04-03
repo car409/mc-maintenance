@@ -174,7 +174,6 @@ class LogAnalyzer(object):
         if end_idx == len(ends) - 1:
           break
         while starts[start_idx + 1] < ends[end_idx]:
-          #print 'Found for user: ' + user + ' ' + starts[start_idx] + ': ' + starts[start_idx + 1] + ': ' + ends[end_idx]
           start_idx += 1
         start_idx += 1
         end_idx += 1
