@@ -89,7 +89,15 @@ def ToRows(results):
 
       
 class LogAnalyzer(object):
-  def __init__(self, log_dir=None):
+  def __init__(self, log_dir=None, start=None, end=None):
+    """Initialize Analyzer.
+    
+    Args:
+      log_dir: fully qualified location of the logs.
+      start: datetime.datetime (None => include earliest)
+      end: datetime.datetime (None => include latest)
+    """
+    
     if log_dir:
       self.log_dir = log_dir
     else:
@@ -98,6 +106,8 @@ class LogAnalyzer(object):
     self._end_times = defaultdict(set)
     self._result = defaultdict(list)
     self._server_stop_times = []
+    self._start = start
+    self._end = end
     
   def _analyzeLine(self, line, date, data):
     """Grabs the time and user_name from a log line.
@@ -144,6 +154,22 @@ class LogAnalyzer(object):
     for f in files:
       self._analyzeFile(os.path.join(self.log_dir, f))
 
+  def _adjustRange(self, start, end):
+    """Return a (start, end) pair in range, or (None, None)."""
+    adjusted_start = start
+    if self._start:
+      if end < self._start:
+        return None
+      adjusted_start = max(self._start, start)
+      
+    adjusted_end = end
+    if self._end:
+      if self._end < start:
+        return None
+      adjusted_end = min(self._end, end)
+      
+    return (adjusted_start, adjusted_end)
+    
   def _zipTimes(self, user):
     """Match all start and end times for a given user.
     
@@ -160,17 +186,22 @@ class LogAnalyzer(object):
     result = []
     if len(starts) == len(ends):
       for i in xrange(len(starts)):
-        result.append((starts[i], ends[i]))
+        interval = self._adjustRange(starts[i], ends[i])
+        if interval:
+          result.append(interval)
       return result
 
     start_idx = 0
     end_idx = 0
     while end_idx < len(ends):
+      interval = self._adjustRange(starts[start_idx], ends[end_idx])
       if start_idx == len(starts) - 1:
-        result.append((starts[start_idx], ends[end_idx]))
+        if interval:
+          result.append(interval)
         break
       else:
-        result.append((starts[start_idx], ends[end_idx]))
+        if interval:
+          result.append(interval)
         if end_idx == len(ends) - 1:
           break
         while starts[start_idx + 1] < ends[end_idx]:
@@ -181,6 +212,8 @@ class LogAnalyzer(object):
     return result  
 
   def Analyze(self):
+    """Iterates over logs and retains login/logoff times within start/end."""
+    
     self._analyzeLogs()
     for user in self._start_times:
       self._result[user] = self._zipTimes(user)
