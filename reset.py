@@ -5,7 +5,10 @@ from datetime import datetime
 import pytz
 import subprocess
 
+
 _ROOT = 'gs://mc-project-1199-minecraft-backup/' 
+_DEST = '/home/minecraft'
+_GSUTIL = '/usr/bin/gsutil'
 
 
 def _ConvertTime(date, hour):
@@ -33,7 +36,7 @@ def _GetGCSFileName(date, hour):
   utc_date = "%04d%02d%02d" % (utc_time.year, utc_time.month, utc_time.day)
   utc_hour = "%02d" % utc_time.hour
   wildcard = _ROOT + utc_date + '-*-world/'
-  proc = subprocess.Popen(['/usr/bin/gsutil', 'ls', wildcard], stdout=subprocess.PIPE)
+  proc = subprocess.Popen([_GSUTIL, 'ls', wildcard], stdout=subprocess.PIPE)
   (out, err) = proc.communicate()
   result = []
   for path in out.splitlines(): 
@@ -42,9 +45,35 @@ def _GetGCSFileName(date, hour):
   return ""
 
 
+def _DownloadWorld(world_dir):
+  """Download from GCS.
+
+  Args:
+    world_dir: full path to world (e.g. 'gs://mc-project-1199-minecraft-backup/20160412-010001-world/')
+  """
+  proc = subprocess.Popen([_GSUTIL, '-m', 'cp', '-R', world_dir, _DEST], stdout=subprocess.PIPE)
+  (out, err) = proc.communicate()
+
+
+def _ShutDownServer():
+  pass
+
+
+def _ReplaceWorld(world_dir):
+  pass
+
+
+def _StartServer():
+  pass
+
+
 def main():
-  result = _GetGCSFileName('20160411', '210103')
-  print result
+  world_dir = _GetGCSFileName('20160411', '210103')
+  print world_dir
+  _DownloadWorld(world_dir)
+  _ShutDownServer()
+  _ReplaceWorld(world_dir)
+  _StartServer()
 
 
 if __name__ == "__main__":
