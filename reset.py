@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+import os
 import pytz
 import subprocess
 
@@ -51,12 +52,27 @@ def _DownloadWorld(world_dir):
   Args:
     world_dir: full path to world (e.g. 'gs://mc-project-1199-minecraft-backup/20160412-010001-world/')
   """
-  proc = subprocess.Popen([_GSUTIL, '-m', 'cp', '-R', world_dir, _DEST], stdout=subprocess.PIPE)
+  proc = subprocess.Popen([
+      _GSUTIL,
+      '-m',
+      'cp',
+      '-R',
+      world_dir,
+      _DEST],
+      stdout=subprocess.PIPE)
   (out, err) = proc.communicate()
 
 
 def _ShutDownServer():
-  pass
+  proc = subprocess.Popen([
+      'screen',
+      '-S',
+      'mcs',
+      '-X',
+      'stuff',
+      '/stop\n'],
+      stdout=subprocess.PIPE)
+  (out, err) = proc.communicate()
 
 
 def _ReplaceWorld(world_dir):
@@ -64,13 +80,29 @@ def _ReplaceWorld(world_dir):
 
 
 def _StartServer():
-  pass
+  os.chdir(_DEST)
+  proc = subprocess.Popen([
+      'screen',
+      '-d',
+      '-m',
+      '-S',
+      'mcs',
+      'java',
+      '-Xms6G',
+      '-Xmx6G',
+      '-d64',
+      '-jar',
+      'minecraft_server.1.9.2.jar',
+      'nogui'],
+      stdout=subprocess.PIPE)
+  (out, err) = proc.communicate()
 
 
 def main():
   world_dir = _GetGCSFileName('20160411', '210103')
   print world_dir
-  _DownloadWorld(world_dir)
+  #_DownloadWorld(world_dir)
+  import pdb; pdb.set_trace()
   _ShutDownServer()
   _ReplaceWorld(world_dir)
   _StartServer()
