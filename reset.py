@@ -4,12 +4,14 @@ from datetime import datetime
 
 import os
 import pytz
+import shutil
 import subprocess
 
 
 _ROOT = 'gs://mc-project-1199-minecraft-backup/' 
 _DEST = '/home/minecraft'
 _GSUTIL = '/usr/bin/gsutil'
+_WORLD = _DEST + '/world'
 
 
 def _ConvertTime(date, hour):
@@ -27,9 +29,7 @@ def _ConvertTime(date, hour):
   minute = int(hour[2:4])
   secs = int(hour[4:])
   from_date = from_zone.localize(datetime(year, month, day, hr, minute, secs))
-  result = pytz.utc.normalize(from_date)
-  #import pdb; pdb.set_trace()
-  return result
+  return pytz.utc.normalize(from_date)
 
 
 def _GetGCSFileName(date, hour):
@@ -76,7 +76,15 @@ def _ShutDownServer():
 
 
 def _ReplaceWorld(world_dir):
-  pass
+  """Replace current world with the contents copied from world_dir.
+
+  Args:
+    world_dir: full path to world (e.g. 'gs://mc-project-1199-minecraft-backup/20160412-010001-world/')
+  """
+  backup_dir = world_dir.split('/')[-2]
+  
+  shutil.rmtree(_WORLD)
+  shutil.move(_DEST + '/' + backup_dir, _WORLD)
 
 
 def _StartServer():
@@ -99,12 +107,14 @@ def _StartServer():
 
 
 def main():
-  world_dir = _GetGCSFileName('20160411', '210103')
+  world_dir = _GetGCSFileName('20160311', '210103')
   print world_dir
-  #_DownloadWorld(world_dir)
-  import pdb; pdb.set_trace()
+  _DownloadWorld(world_dir)
+  print 'Shutting down server'
   _ShutDownServer()
+  print 'Resetting world'
   _ReplaceWorld(world_dir)
+  print 'Restarting server'
   _StartServer()
 
 
